@@ -3,7 +3,7 @@ VERSION = 0.1
 CC = cc
 CFLAGS = -std=c99 -pedantic -Wall -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DVERSION=\"$(VERSION)\"
 
-SRC = finger.c
+SRC = finger.c util.c
 OBJ = ${SRC:.c=.o}
 
 all: finger

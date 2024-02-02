@@ -1,10 +1,15 @@
 #include <netdb.h>
 #include <netinet/in.h>
-#include <sys/socket.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
 #include <unistd.h>
+
+#include "util.h"
+
+static int dial(char *host, char *port);
+static void usage(void);
 
 int dial(char *host, char *port) {
 	struct addrinfo hints;
@@ -16,7 +21,7 @@ int dial(char *host, char *port) {
 	hints.ai_socktype = SOCK_STREAM;
 
 	if (getaddrinfo(host, port, &hints, &res) != 0) {
-		exit(1);
+		die("cannot resolve hostname '%s':", host);
 	}
 
 	for (r = res; r; r = r->ai_next) {
@@ -32,26 +37,23 @@ int dial(char *host, char *port) {
 
 	freeaddrinfo(res);
 	if (!r) {
-		exit(1);
+		die("cannot connect to host '%s':", host);
 	}
 	return fd;
 }
 
 void usage() {
-	printf("usage: finger [user@]hostname [-v] [-h]\n");
-	exit(1);
+	die("usage: finger [user@]hostname [-v] [-h]");
 }
 
 int main(int argc, char *argv[]) {
-	char *port = "79";
-	char *host = "localhost";
+	char *port = "79", *host = "localhost", *user = NULL;
 	char bufout[256];
-	char *user = NULL;
 	char *ret;
 	FILE *srv;
-	char c;
+	int i, c;
 
-	for (int i = 1; i < argc; i++) {
+	for (i = 1; i < argc; i++) {
 		if (!strcmp(argv[i], "-v")) {
 			fprintf(stderr, "finger-"VERSION"\n");
 			return 0;
@@ -71,7 +73,7 @@ int main(int argc, char *argv[]) {
 
 	srv = fdopen(dial(host, port), "r+");
 	if (!srv) {
-		exit(1);
+		die("fdopen:");
 	}
 
 	if (user == NULL) {
