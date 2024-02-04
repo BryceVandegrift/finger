@@ -11,7 +11,9 @@
 static int dial(char *host, char *port);
 static void usage(void);
 
-int dial(char *host, char *port) {
+int
+dial(char *host, char *port)
+{
 	struct addrinfo hints;
 	struct addrinfo *res, *r;
 	int fd;
@@ -42,11 +44,15 @@ int dial(char *host, char *port) {
 	return fd;
 }
 
-void usage() {
+void
+usage()
+{
 	die("usage: finger [user@]hostname [-v] [-h]");
 }
 
-int main(int argc, char *argv[]) {
+int
+main(int argc, char *argv[])
+{
 	char *port = "79", *host = "localhost", *user = NULL;
 	char bufout[256];
 	char *ret;

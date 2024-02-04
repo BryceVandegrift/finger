@@ -3,18 +3,24 @@ VERSION = 0.1
 CC = cc
 CFLAGS = -std=c99 -pedantic -Wall -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DVERSION=\"$(VERSION)\"
 
-SRC = finger.c util.c
-OBJ = ${SRC:.c=.o}
+REQ = util
+BIN = finger fingerd
 
-all: finger
+all: ${BIN}
+
+finger: finger.o ${REQ:=.o}
+fingerd: fingerd.o ${REQ:=.o}
+
+finger.o: finger.c ${REQ:=.h}
+fingerd.o: fingerd.c ${REQ:=.h}
+
+.o:
+	${CC} -o $@ $< ${REQ:=.o}
 
 .c.o:
 	${CC} -c ${CFLAGS} $<
 
-finger: ${OBJ}
-	${CC} -o $@ ${OBJ} ${LDFLAGS}
-
 clean:
-	rm -f finger ${OBJ}
+	rm -f ${BIN} ${BIN:=.o} ${REQ:=.o}
 
 .PHONY: all clean
