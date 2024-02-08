@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
@@ -22,4 +23,14 @@ die(const char *fmt, ...)
 	}
 
 	exit(1);
+}
+
+void
+trim(char *s)
+{
+	char *e;
+
+	for (e = s + strlen(s); e > s && isspace((unsigned char)*(e - 1)); e--);
+
+	*e = '\0';
 }

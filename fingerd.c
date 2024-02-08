@@ -1,5 +1,7 @@
+#include <grp.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <pwd.h>
 #include <signal.h>
 #include <string.h>
 #include <stdio.h>
@@ -17,19 +19,71 @@ static int conn(char *host, char *port);
 static void usage(void);
 
 void
-serv(int req, char *group)
+serv(int req, char *grp)
 {
-	FILE *fp;
+	struct group *grinfo;
+	struct passwd *usrinfo;
+	char user[64];
+	char c;
+	size_t usrsize;
+	FILE *fp, *plan;
 
 	fp = fdopen(req, "r+");
 	if (!fp) {
-		fprintf(stderr, "fdopen: "); //REPLACE
+		fprintf(stderr, "fopen: "); //REPLACE
 		perror(NULL);
 		return;
 	}
 
-	fprintf(fp, "This is a test\r\n");
+	/* check if a username is sent */
+	fgets(user, sizeof(user), fp);
+	if ((usrsize = strcspn(user, "\r\n")) > 0) {
+		trim(user);
+
+		for (usrinfo = getpwent(); usrinfo != NULL; usrinfo = getpwent()) {
+			if (!strcmp(usrinfo->pw_name, user)) {
+				fprintf(fp, "User: %s\r\n", usrinfo->pw_name);
+				fprintf(fp, "Dir: %s\r\n", usrinfo->pw_dir);
+				fprintf(fp, "Shell: %s\r\n", usrinfo->pw_shell);
+				fprintf(fp, "Plan:\r\n");
+				plan = fopen(strcat(usrinfo->pw_dir, "/.plan"), "r");
+				if (!plan) {
+					fprintf(fp, "No plan\r\n");
+				} else {
+					for (;;) {
+						c = fgetc(plan);
+						if (c == EOF) {
+							break;
+						}
+						fputc(c, fp);
+					}
+				}
+				fclose(fp);
+				goto end;
+			}
+		}
+
+		fprintf(fp, "Could not find user: '%s'\r\n", user);
+end:
+		endpwent();
+	} else {
+		fprintf(fp, "Finger users on this server:\r\n");
+		fprintf(fp, "============================\r\n\r\n");
+
+		grinfo = getgrnam(grp);
+		if (grinfo == NULL) {
+			fprintf(stderr, "getgrnam: "); //REPLACE
+			perror(NULL);
+			return;
+		}
+
+		for (int i = 0; grinfo->gr_mem[i] != NULL; i++) {
+			fprintf(fp, "%s\r\n", grinfo->gr_mem[i]);
+		}
+	}
+
 	fflush(fp);
+	fclose(fp);
 
 	return;
 }
