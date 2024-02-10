@@ -1,7 +1,4 @@
-VERSION = 0.1
-
-CC = cc
-CFLAGS = -std=c99 -pedantic -Wall -D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -DVERSION=\"$(VERSION)\"
+include config.mk
 
 REQ = util
 BIN = finger fingerd
@@ -20,7 +17,15 @@ fingerd.o: fingerd.c ${REQ:=.h}
 .c.o:
 	${CC} -c ${CFLAGS} $<
 
+install: all
+	mkdir -p ${DESTDIR}${PREFIX}/bin
+	cp -f finger fingerd ${DESTDIR}${PREFIX}/bin
+
+uninstall:
+	rm -f ${DESTDIR}${PREFIX}/bin/finger
+	rm -f ${DESTDIR}${PREFIX}/bin/fingerd
+
 clean:
 	rm -f ${BIN} ${BIN:=.o} ${REQ:=.o}
 
-.PHONY: all clean
+.PHONY: all clean install uninstall
