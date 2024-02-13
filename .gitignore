@@ -1,3 +1,5 @@
 finger
 fingerd
 *.o
+*.1
+*.8
