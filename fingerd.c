@@ -58,6 +58,7 @@ serv(int req, char *grp)
 						fputc(c, fp);
 					}
 				}
+				fclose(plan);
 				fclose(fp);
 				goto end;
 			}
