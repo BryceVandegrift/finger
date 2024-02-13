@@ -14,19 +14,56 @@
 
 #define MAXNPROCS 64
 
+static void sendplan(char *user, FILE *out);
 static void serv(int req, char *group);
 static int conn(char *host, char *port);
 static void usage(void);
 
 void
+sendplan(char *user, FILE *out)
+{
+	struct passwd *usrinfo;
+	FILE *plan;
+	char c;
+
+	for (usrinfo = getpwent(); usrinfo != NULL; usrinfo = getpwent()) {
+		if (!strcmp(usrinfo->pw_name, user)) {
+			fprintf(out, "User: %s\r\n", usrinfo->pw_name);
+			fprintf(out, "Dir: %s\r\n", usrinfo->pw_dir);
+			fprintf(out, "Shell: %s\r\n", usrinfo->pw_shell);
+			fprintf(out, "Plan:\r\n");
+
+			plan = fopen(strcat(usrinfo->pw_dir, "/.plan"), "r");
+			if (!plan) {
+				fprintf(out, "No plan\r\n");
+			} else {
+				for (;;) {
+					c = fgetc(plan);
+					if (c == EOF) {
+						break;
+					}
+					fputc(c, out);
+				}
+				fclose(plan);
+			}
+			fclose(out);
+			goto end;
+		}
+	}
+	fprintf(out, "Could not find user: '%s'\r\n", user);
+
+end:
+	endpwent();
+}
+
+void
 serv(int req, char *grp)
 {
 	struct group *grinfo;
-	struct passwd *usrinfo;
 	char user[64];
-	char c;
 	size_t usrsize;
-	FILE *fp, *plan;
+	FILE *fp;
+	int i;
 
 	fp = fdopen(req, "r+");
 	if (!fp) {
@@ -40,33 +77,7 @@ serv(int req, char *grp)
 	if ((usrsize = strcspn(user, "\r\n")) > 0) {
 		trim(user);
 
-		for (usrinfo = getpwent(); usrinfo != NULL; usrinfo = getpwent()) {
-			if (!strcmp(usrinfo->pw_name, user)) {
-				fprintf(fp, "User: %s\r\n", usrinfo->pw_name);
-				fprintf(fp, "Dir: %s\r\n", usrinfo->pw_dir);
-				fprintf(fp, "Shell: %s\r\n", usrinfo->pw_shell);
-				fprintf(fp, "Plan:\r\n");
-				plan = fopen(strcat(usrinfo->pw_dir, "/.plan"), "r");
-				if (!plan) {
-					fprintf(fp, "No plan\r\n");
-				} else {
-					for (;;) {
-						c = fgetc(plan);
-						if (c == EOF) {
-							break;
-						}
-						fputc(c, fp);
-					}
-				}
-				fclose(plan);
-				fclose(fp);
-				goto end;
-			}
-		}
-
-		fprintf(fp, "Could not find user: '%s'\r\n", user);
-end:
-		endpwent();
+		sendplan(user, fp);
 	} else {
 		fprintf(fp, "Finger users on this server:\r\n");
 		fprintf(fp, "============================\r\n\r\n");
@@ -78,7 +89,7 @@ end:
 			return;
 		}
 
-		for (int i = 0; grinfo->gr_mem[i] != NULL; i++) {
+		for (i = 0; grinfo->gr_mem[i] != NULL; i++) {
 			fprintf(fp, "%s\r\n", grinfo->gr_mem[i]);
 		}
 	}
