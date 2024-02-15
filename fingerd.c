@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <grp.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -67,8 +68,7 @@ serv(int req, char *grp)
 
 	fp = fdopen(req, "r+");
 	if (!fp) {
-		fprintf(stderr, "fopen: "); //REPLACE
-		perror(NULL);
+		fprintf(stderr, "fopen: %s\n", strerror(errno));
 		return;
 	}
 
@@ -84,8 +84,7 @@ serv(int req, char *grp)
 
 		grinfo = getgrnam(grp);
 		if (grinfo == NULL) {
-			fprintf(stderr, "getgrnam: "); //REPLACE
-			perror(NULL);
+			fprintf(stderr, "getgrnam: %s\n", strerror(errno));
 			return;
 		}
 
@@ -178,16 +177,14 @@ int main(int argc, char *argv[])
 	for (;;) {
 		slen = sizeof(sa);
 		if ((req = accept(fd, &sa, &slen)) == -1) {
-			fprintf(stderr, "accept: "); //REPLACE
-			perror(NULL);
+			fprintf(stderr, "accept: %s\n", strerror(errno));
 			continue;
 		}
 
 		pid = fork();
 
 		if (pid == -1) {
-			fprintf(stderr, "fork: "); //REPLACE
-			perror(NULL);
+			fprintf(stderr, "fork: %s\n", strerror(errno));
 			continue;
 		} else if (pid == 0) {
 			close(fd);
@@ -197,8 +194,7 @@ int main(int argc, char *argv[])
 			timeout.tv_usec = 0;
 			if (setsockopt(req, SOL_SOCKET, SO_RCVTIMEO, &timeout,
 						sizeof(timeout)) == -1) {
-				fprintf(stderr, "setsockopt: "); //REPLACE
-				perror(NULL);
+				fprintf(stderr, "setsockopt: %s\n", strerror(errno));
 			}
 
 			serv(req, group);
