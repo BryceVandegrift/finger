@@ -2,6 +2,12 @@
 
 A simple, small, and portable finger client and server.
 
+## About
+
+A simple finger client and server written in C89 that can be built on
+almost any POSIX 200809 or X/Open 700 system. In order to build documentation
+[scdoc](https://sr.ht/~sircmpwn/scdoc/) is needed.
+
 ## Usage
 
 ### finger

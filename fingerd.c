@@ -29,14 +29,15 @@ sendplan(char *user, FILE *out)
 
 	for (usrinfo = getpwent(); usrinfo != NULL; usrinfo = getpwent()) {
 		if (!strcmp(usrinfo->pw_name, user)) {
-			fprintf(out, "User: %s\r\n", usrinfo->pw_name);
-			fprintf(out, "Dir: %s\r\n", usrinfo->pw_dir);
-			fprintf(out, "Shell: %s\r\n", usrinfo->pw_shell);
-			fprintf(out, "Plan:\r\n");
+			fprintf(out, "user: %s\r\n", usrinfo->pw_name);
+			fprintf(out, "name: %s\r\n", usrinfo->pw_gecos);
+			fprintf(out, "dir: %s\r\n", usrinfo->pw_dir);
+			fprintf(out, "shell: %s\r\n", usrinfo->pw_shell);
+			fprintf(out, "plan:\r\n");
 
 			plan = fopen(strcat(usrinfo->pw_dir, "/.plan"), "r");
 			if (!plan) {
-				fprintf(out, "No plan\r\n");
+				fprintf(out, "no plan\r\n");
 			} else {
 				for (;;) {
 					c = fgetc(plan);
@@ -51,7 +52,7 @@ sendplan(char *user, FILE *out)
 			goto end;
 		}
 	}
-	fprintf(out, "Could not find user: '%s'\r\n", user);
+	fprintf(out, "could not find user: '%s'\r\n", user);
 
 end:
 	endpwent();
@@ -79,8 +80,7 @@ serv(int req, char *grp)
 
 		sendplan(user, fp);
 	} else {
-		fprintf(fp, "Finger users on this server:\r\n");
-		fprintf(fp, "============================\r\n\r\n");
+		fprintf(fp, "users on this server:\r\n");
 
 		grinfo = getgrnam(grp);
 		if (grinfo == NULL) {
