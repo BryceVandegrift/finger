@@ -25,6 +25,7 @@ sendplan(char *user, FILE *out)
 {
 	struct passwd *usrinfo;
 	FILE *plan;
+	char *path;
 	char c;
 
 	for (usrinfo = getpwent(); usrinfo != NULL; usrinfo = getpwent()) {
@@ -35,7 +36,8 @@ sendplan(char *user, FILE *out)
 			fprintf(out, "shell: %s\r\n", usrinfo->pw_shell);
 			fprintf(out, "plan:\r\n");
 
-			plan = fopen(strcat(usrinfo->pw_dir, "/.plan"), "r");
+			path = strcat(usrinfo->pw_dir, "/.plan");
+			plan = fopen(path, "r");
 			if (!plan) {
 				fprintf(out, "no plan\r\n");
 			} else {
@@ -159,6 +161,8 @@ int main(int argc, char *argv[])
 			port = argv[++i];
 		} else if (!strcmp(argv[i], "-g")) {
 			group = argv[++i];
+		} else {
+			usage();
 		}
 	}
 

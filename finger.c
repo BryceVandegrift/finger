@@ -87,7 +87,7 @@ main(int argc, char *argv[])
 	} else {
 		sprintf(bufout, "%s\r\n", user);
 	}
-	fprintf(srv, bufout);
+	fprintf(srv, "%s", bufout);
 	fflush(srv);
 
 	for (;;) {
