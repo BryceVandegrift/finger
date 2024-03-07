@@ -83,9 +83,9 @@ main(int argc, char *argv[])
 	}
 
 	if (user == NULL) {
-		sprintf(bufout, "\r\n");
+		snprintf(bufout, sizeof("\r\n"), "\r\n");
 	} else {
-		sprintf(bufout, "%s\r\n", user);
+		snprintf(bufout, sizeof(user) + sizeof("\r\n"), "%s\r\n", user);
 	}
 	fprintf(srv, "%s", bufout);
 	fflush(srv);

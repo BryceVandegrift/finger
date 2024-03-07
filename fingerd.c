@@ -36,7 +36,7 @@ sendplan(char *user, FILE *out)
 			fprintf(out, "shell: %s\r\n", usrinfo->pw_shell);
 			fprintf(out, "plan:\r\n");
 
-			path = strcat(usrinfo->pw_dir, "/.plan");
+			path = strncat(usrinfo->pw_dir, "/.plan", sizeof(usrinfo->pw_dir) - strlen(usrinfo->pw_dir) - 1);
 			plan = fopen(path, "r");
 			if (!plan) {
 				fprintf(out, "no plan\r\n");
