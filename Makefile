@@ -1,3 +1,6 @@
+# finger and fingerd - minimal finger client and server
+# See LICENSE file for copyright and license details.
+
 include config.mk
 
 REQ = util
