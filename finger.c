@@ -17,7 +17,7 @@ dial(char *host, char *port)
 {
 	struct addrinfo hints;
 	struct addrinfo *res, *r;
-	int fd;
+	int fd = -1;
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
@@ -39,7 +39,7 @@ dial(char *host, char *port)
 	}
 
 	freeaddrinfo(res);
-	if (!r) {
+	if (!r || fd == -1) {
 		die("cannot connect to host '%s':", host);
 	}
 	return fd;
