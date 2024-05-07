@@ -167,6 +167,12 @@ int main(int argc, char *argv[])
 		}
 	}
 
+#ifdef __OpenBSD__
+	if (pledge("stdio rpath inet unix dns getpw proc", NULL) == -1) {
+		die("pledge");
+	}
+#endif /* __OpenBSD__ */
+
 	/* Ignore child exit signal */
 	if (signal(SIGCHLD, SIG_IGN) == SIG_ERR) {
 		die("could not ignore SIGCHLD");

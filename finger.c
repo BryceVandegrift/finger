@@ -78,6 +78,12 @@ main(int argc, char *argv[])
 		}
 	}
 
+#ifdef __OpenBSD__
+	if (pledge("stdio inet unix dns", NULL) == -1) {
+		die("pledge");
+	}
+#endif /* __OpenBSD__ */
+
 	srv = fdopen(dial(host, port), "r+");
 	if (!srv) {
 		die("fdopen:");
